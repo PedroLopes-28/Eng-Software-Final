@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CRUD de Avaliações</title>
+  <style>
+    /* Base */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    /* Tabela */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #ff6b00;
+      color: white;
+    }
+
+    /* Botões de ação na lista */
+    .actions button {
+      margin-right: 5px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .actions button.view    { background-color: #3498db; color: #fff; }
+    .actions button.edit    { background-color: #ff6b00; color: #fff; }
+    .actions button.delete  { background-color: #e74c3c; color: #fff; }
+    .actions button:hover   { opacity: 0.9; }
+
+    /* Botões principais */
+    .btn-primary {
+      background-color: #ff6b00;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+    .btn-primary:hover {
+      background-color: #e05d00;
+    }
+    .btn-secondary {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+    .btn-secondary:hover {
+      background-color: #2980b9;
+    }
+
+    /* Formulário */
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- LISTAGEM -->
+    <section id="list-view">
+      <header style="display:flex; justify-content:space-between; align-items:center;">
+        <h1>Avaliações</h1>
+        <button id="btn-new" class="btn-primary">Nova Avaliação</button>
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Estrelas</th>
+            <th>Comentário</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- linhas geradas por JS -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FORMULÁRIO -->
+    <section id="form-view" class="hidden">
+      <header>
+        <h1 id="form-title">Nova Avaliação</h1>
+      </header>
+      <form id="eval-form">
+        <input type="hidden" id="eval-id" />
+        <div class="form-group">
+          <label for="cliente">Cliente</label>
+          <input type="text" id="cliente" required />
+        </div>
+        <div class="form-group">
+          <label for="estrelas">Estrelas</label>
+          <select id="estrelas" required>
+            <option value="">Selecione</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="comentario">Comentário</label>
+          <textarea id="comentario" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="data">Data</label>
+          <input type="text" id="data" required />
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button type="submit" class="btn-primary">Salvar</button>
+          <button type="button" id="btn-cancel" class="btn-secondary">Cancelar</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    // DADOS INICIAIS
+    let avaliacoes = [
+      { id: 1, cliente: 'Maria Silva', estrelas: 4, comentario: 'Entrega rápida e produto ótimo.', data: '10/06/2025' },
+      { id: 2, cliente: 'João Pereira', estrelas: 5, comentario: 'Excelente atendimento.', data: '08/06/2025' },
+      { id: 3, cliente: 'Ana Costa', estrelas: 3, comentario: 'Produto bom, mas atrasou a entrega.', data: '05/06/2025' }
+    ];
+    let editingId = null;
+
+    const listView  = document.getElementById('list-view');
+    const formView  = document.getElementById('form-view');
+    const tableBody = document.getElementById('table-body');
+    const form      = document.getElementById('eval-form');
+    const formTitle = document.getElementById('form-title');
+    const btnNew    = document.getElementById('btn-new');
+    const btnCancel = document.getElementById('btn-cancel');
+
+    // RENDERIZA LISTA
+    function renderList() {
+      tableBody.innerHTML = '';
+      avaliacoes.forEach(av => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${av.cliente}</td>
+          <td>${'★'.repeat(av.estrelas)}${'☆'.repeat(5 - av.estrelas)}</td>
+          <td>${av.comentario}</td>
+          <td>${av.data}</td>
+          <td class="actions">
+            <button class="view"   onclick="viewEval(${av.id})">Ver</button>
+            <button class="edit"   onclick="editEval(${av.id})">Editar</button>
+            <button class="delete" onclick="deleteEval(${av.id})">Excluir</button>
+          </td>`;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // MOSTRA A LISTA
+    function showList() {
+      formView.classList.add('hidden');
+      listView.classList.remove('hidden');
+      renderList();
+      // reabilita campos caso viesse de "Ver"
+      form.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+      form.querySelector('button[type="submit"]').style.display = '';
+      btnCancel.textContent = 'Cancelar';
+    }
+
+    // NOVA AVALIAÇÃO
+    btnNew.addEventListener('click', () => {
+      editingId = null;
+      formTitle.textContent = 'Nova Avaliação';
+      form.reset();
+      document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
+      listView.classList.add('hidden');
+      formView.classList.remove('hidden');
+    });
+
+    // CANCELAR
+    btnCancel.addEventListener('click', showList);
+
+    // SALVAR (CRIAR ou ATUALIZAR)
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const cliente    = document.getElementById('cliente').value;
+      const estrelas   = parseInt(document.getElementById('estrelas').value);
+      const comentario = document.getElementById('comentario').value;
+      const data       = document.getElementById('data').value;
+
+      if (editingId) {
+        const av = avaliacoes.find(a => a.id === editingId);
+        av.cliente = cliente;
+        av.estrelas = estrelas;
+        av.comentario = comentario;
+        av.data = data;
+      } else {
+        const newId = avaliacoes.length ? Math.max(...avaliacoes.map(a => a.id)) + 1 : 1;
+        avaliacoes.push({ id: newId, cliente, estrelas, comentario, data });
+      }
+      showList();
+    });
+
+    // EDITAR
+    function editEval(id) {
+      const av = avaliacoes.find(a => a.id === id);
+      editingId = id;
+      formTitle.textContent = 'Editar Avaliação';
+      document.getElementById('eval-id').value    = av.id;
+      document.getElementById('cliente').value    = av.cliente;
+      document.getElementById('estrelas').value   = av.estrelas;
+      document.getElementById('comentario').value = av.comentario;
+      document.getElementById('data').value       = av.data;
+      listView.classList.add('hidden');
+      formView.classList.remove('hidden');
+    }
+
+    // VISUALIZAR
+    function viewEval(id) {
+      editEval(id);
+      // bloqueia campos
+      form.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+      form.querySelector('button[type="submit"]').style.display = 'none';
+      btnCancel.textContent = 'Voltar';
+    }
+
+    // EXCLUIR
+    function deleteEval(id) {
+      if (confirm('Deseja realmente excluir esta avaliação?')) {
+        avaliacoes = avaliacoes.filter(a => a.id !== id);
+        renderList();
+      }
+    }
+
+    // INICIALIZA
+    document.addEventListener('DOMContentLoaded', showList);
+  </script>
+</body>
+</html>
