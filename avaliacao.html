@@ -3,103 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CRUD de Avaliações</title>
+  <title>Avaliações do Cliente</title>
   <style>
-    /* Base */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
       padding: 20px;
       color: #333;
     }
     .container {
-      max-width: 900px;
-      margin: 0 auto;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1, h2 {
+      color: #ff6b00;
+    }
+
+    .avaliacoes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      background-color: #ff6b00;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .card {
       background: white;
-      padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 16px;
+      margin-bottom: 15px;
     }
 
-    /* Tabela */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
-    }
-    th {
-      background-color: #ff6b00;
-      color: white;
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
     }
 
-    /* Botões de ação na lista */
+    .estrelas {
+      color: #ffb703;
+      font-size: 1.2rem;
+    }
+
+    .comentario {
+      font-style: italic;
+      margin: 8px 0;
+    }
+
+    .meta {
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    .actions {
+      text-align: right;
+      margin-top: 10px;
+    }
+
     .actions button {
-      margin-right: 5px;
-      padding: 8px 12px;
+      background-color: #eee;
       border: none;
-      border-radius: 5px;
-      font-weight: 600;
+      padding: 6px 10px;
+      margin-left: 5px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      font-weight: 500;
     }
-    .actions button.view    { background-color: #3498db; color: #fff; }
-    .actions button.edit    { background-color: #ff6b00; color: #fff; }
-    .actions button.delete  { background-color: #e74c3c; color: #fff; }
-    .actions button:hover   { opacity: 0.9; }
 
-    /* Botões principais */
-    .btn-primary {
-      background-color: #ff6b00;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.3s;
+    .actions .edit {
+      color: #ff6b00;
     }
-    .btn-primary:hover {
-      background-color: #e05d00;
-    }
-    .btn-secondary {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.3s;
-    }
-    .btn-secondary:hover {
-      background-color: #2980b9;
+
+    .actions .delete {
+      color: #e74c3c;
     }
 
     /* Formulário */
+    #form-view {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 30px;
+    }
+
     .form-group {
       margin-bottom: 15px;
     }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 600;
-    }
-    input[type="text"],
-    select,
-    textarea {
+
+    input, select, textarea {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
     }
 
     .hidden { display: none; }
@@ -107,180 +116,143 @@
 </head>
 <body>
   <div class="container">
-    <!-- LISTAGEM -->
-    <section id="list-view">
-      <header style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>Avaliações</h1>
-        <button id="btn-new" class="btn-primary">Nova Avaliação</button>
-      </header>
-      <table>
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Estrelas</th>
-            <th>Comentário</th>
-            <th>Data</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="table-body">
-          <!-- linhas geradas por JS -->
-        </tbody>
-      </table>
-    </section>
 
-    <!-- FORMULÁRIO -->
+    <!-- Cabeçalho da loja -->
+    <h1>Lanches do João</h1>
+
+    <!-- Formulário -->
     <section id="form-view" class="hidden">
-      <header>
-        <h1 id="form-title">Nova Avaliação</h1>
-      </header>
-      <form id="eval-form">
-        <input type="hidden" id="eval-id" />
+      <h2 id="form-title">Nova Avaliação</h2>
+      <form id="avaliacao-form">
+        <input type="hidden" id="avaliacao-id" />
         <div class="form-group">
-          <label for="cliente">Cliente</label>
-          <input type="text" id="cliente" required />
+          <label for="produto">Produto</label>
+          <input type="text" id="produto" required />
         </div>
         <div class="form-group">
           <label for="estrelas">Estrelas</label>
           <select id="estrelas" required>
             <option value="">Selecione</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
           </select>
         </div>
         <div class="form-group">
           <label for="comentario">Comentário</label>
-          <textarea id="comentario" rows="4"></textarea>
+          <textarea id="comentario" rows="3"></textarea>
         </div>
         <div class="form-group">
           <label for="data">Data</label>
           <input type="text" id="data" required />
         </div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
-          <button type="submit" class="btn-primary">Salvar</button>
-          <button type="button" id="btn-cancel" class="btn-secondary">Cancelar</button>
+        <div style="text-align:right;">
+          <button type="submit" class="btn">Salvar</button>
+          <button type="button" class="btn" onclick="cancelar()">Cancelar</button>
         </div>
       </form>
     </section>
+
+    <!-- Lista de avaliações -->
+    <section id="list-view">
+      <div class="avaliacoes-header">
+        <h2>Avaliações de Clientes</h2>
+        <button class="btn" onclick="novaAvaliacao()">Nova Avaliação</button>
+      </div>
+      <div id="lista-avaliacoes"></div>
+    </section>
+
   </div>
 
   <script>
-    // DADOS INICIAIS
+    const usuarioLogado = 'João Pereira';
+
     let avaliacoes = [
-      { id: 1, cliente: 'Maria Silva', estrelas: 4, comentario: 'Entrega rápida e produto ótimo.', data: '10/06/2025' },
-      { id: 2, cliente: 'João Pereira', estrelas: 5, comentario: 'Excelente atendimento.', data: '08/06/2025' },
-      { id: 3, cliente: 'Ana Costa', estrelas: 3, comentario: 'Produto bom, mas atrasou a entrega.', data: '05/06/2025' }
+      { id: 1, produto: 'X-Burguer', cliente: 'João Pereira', estrelas: 5, comentario: 'Top!', data: '10/06/2025' },
+      { id: 2, produto: 'Pizza Calabresa', cliente: 'Maria Silva', estrelas: 4, comentario: 'Muito boa!', data: '09/06/2025' },
     ];
-    let editingId = null;
 
-    const listView  = document.getElementById('list-view');
-    const formView  = document.getElementById('form-view');
-    const tableBody = document.getElementById('table-body');
-    const form      = document.getElementById('eval-form');
-    const formTitle = document.getElementById('form-title');
-    const btnNew    = document.getElementById('btn-new');
-    const btnCancel = document.getElementById('btn-cancel');
+    const listView = document.getElementById('list-view');
+    const formView = document.getElementById('form-view');
+    const lista = document.getElementById('lista-avaliacoes');
+    const form = document.getElementById('avaliacao-form');
 
-    // RENDERIZA LISTA
-    function renderList() {
-      tableBody.innerHTML = '';
-      avaliacoes.forEach(av => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${av.cliente}</td>
-          <td>${'★'.repeat(av.estrelas)}${'☆'.repeat(5 - av.estrelas)}</td>
-          <td>${av.comentario}</td>
-          <td>${av.data}</td>
-          <td class="actions">
-            <button class="view"   onclick="viewEval(${av.id})">Ver</button>
-            <button class="edit"   onclick="editEval(${av.id})">Editar</button>
-            <button class="delete" onclick="deleteEval(${av.id})">Excluir</button>
-          </td>`;
-        tableBody.appendChild(tr);
-      });
+    function renderAvaliacoes() {
+      lista.innerHTML = '';
+      for (const av of avaliacoes) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div class="card-header">
+            <strong>${av.produto}</strong>
+            <div class="estrelas">${'★'.repeat(av.estrelas)}${'☆'.repeat(5 - av.estrelas)}</div>
+          </div>
+          <p class="comentario">"${av.comentario}"</p>
+          <div class="meta">Avaliado por <strong>${av.cliente}</strong> em ${av.data}</div>
+          ${av.cliente === usuarioLogado ? `
+            <div class="actions">
+              <button class="edit" onclick="editar(${av.id})">Editar</button>
+              <button class="delete" onclick="excluir(${av.id})">Excluir</button>
+            </div>` : ''}
+        `;
+        lista.appendChild(div);
+      }
     }
 
-    // MOSTRA A LISTA
-    function showList() {
+    function novaAvaliacao() {
+      form.reset();
+      document.getElementById('avaliacao-id').value = '';
+      document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
+      formView.classList.remove('hidden');
+      listView.classList.add('hidden');
+    }
+
+    function cancelar() {
       formView.classList.add('hidden');
       listView.classList.remove('hidden');
-      renderList();
-      // reabilita campos caso viesse de "Ver"
-      form.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
-      form.querySelector('button[type="submit"]').style.display = '';
-      btnCancel.textContent = 'Cancelar';
     }
 
-    // NOVA AVALIAÇÃO
-    btnNew.addEventListener('click', () => {
-      editingId = null;
-      formTitle.textContent = 'Nova Avaliação';
-      form.reset();
-      document.getElementById('data').value = new Date().toLocaleDateString('pt-BR');
-      listView.classList.add('hidden');
-      formView.classList.remove('hidden');
-    });
-
-    // CANCELAR
-    btnCancel.addEventListener('click', showList);
-
-    // SALVAR (CRIAR ou ATUALIZAR)
     form.addEventListener('submit', e => {
       e.preventDefault();
-      const cliente    = document.getElementById('cliente').value;
-      const estrelas   = parseInt(document.getElementById('estrelas').value);
+      const id = document.getElementById('avaliacao-id').value;
+      const produto = document.getElementById('produto').value;
+      const estrelas = parseInt(document.getElementById('estrelas').value);
       const comentario = document.getElementById('comentario').value;
-      const data       = document.getElementById('data').value;
+      const data = document.getElementById('data').value;
 
-      if (editingId) {
-        const av = avaliacoes.find(a => a.id === editingId);
-        av.cliente = cliente;
+      if (id) {
+        const av = avaliacoes.find(a => a.id == id);
+        av.produto = produto;
         av.estrelas = estrelas;
         av.comentario = comentario;
         av.data = data;
       } else {
-        const newId = avaliacoes.length ? Math.max(...avaliacoes.map(a => a.id)) + 1 : 1;
-        avaliacoes.push({ id: newId, cliente, estrelas, comentario, data });
+        const novoId = Math.max(0, ...avaliacoes.map(a => a.id)) + 1;
+        avaliacoes.push({ id: novoId, produto, cliente: usuarioLogado, estrelas, comentario, data });
       }
-      showList();
+
+      cancelar();
+      renderAvaliacoes();
     });
 
-    // EDITAR
-    function editEval(id) {
+    function editar(id) {
       const av = avaliacoes.find(a => a.id === id);
-      editingId = id;
-      formTitle.textContent = 'Editar Avaliação';
-      document.getElementById('eval-id').value    = av.id;
-      document.getElementById('cliente').value    = av.cliente;
-      document.getElementById('estrelas').value   = av.estrelas;
+      document.getElementById('avaliacao-id').value = av.id;
+      document.getElementById('produto').value = av.produto;
+      document.getElementById('estrelas').value = av.estrelas;
       document.getElementById('comentario').value = av.comentario;
-      document.getElementById('data').value       = av.data;
-      listView.classList.add('hidden');
+      document.getElementById('data').value = av.data;
       formView.classList.remove('hidden');
+      listView.classList.add('hidden');
     }
 
-    // VISUALIZAR
-    function viewEval(id) {
-      editEval(id);
-      // bloqueia campos
-      form.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
-      form.querySelector('button[type="submit"]').style.display = 'none';
-      btnCancel.textContent = 'Voltar';
-    }
-
-    // EXCLUIR
-    function deleteEval(id) {
-      if (confirm('Deseja realmente excluir esta avaliação?')) {
+    function excluir(id) {
+      if (confirm('Deseja excluir esta avaliação?')) {
         avaliacoes = avaliacoes.filter(a => a.id !== id);
-        renderList();
+        renderAvaliacoes();
       }
     }
 
-    // INICIALIZA
-    document.addEventListener('DOMContentLoaded', showList);
+    // Inicializa
+    renderAvaliacoes();
   </script>
 </body>
 </html>
