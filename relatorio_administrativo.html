@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório Administrativo - Ifome</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.1.0"></script>
+  <style>
+    :root {
+      --laranja-ifome: #f97316;
+      --verde-ifome: #10b981;
+      --vermelho-ifome: #ef4444;
+      --azul-ifome: #3b82f6;
+    }
+    .bg-ifome { background-color: var(--laranja-ifome); }
+    .text-ifome { color: var(--laranja-ifome); }
+    .border-ifome { border-color: var(--laranja-ifome); }
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--laranja-ifome);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- HEADER -->
+  <header class="bg-ifome text-white py-4 shadow">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">Relatório Administrativo</h1>
+      <span class="text-sm">Bem-vindo, Administrador</span>
+    </div>
+  </header>
+
+  <!-- FILTROS -->
+  <section class="max-w-7xl mx-auto px-4 mt-6">
+    <div class="bg-white rounded-lg p-4 shadow">
+      <h2 class="text-lg font-semibold mb-4 text-ifome">Filtros</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Data Inicial</label>
+          <input type="date" id="dataInicial" class="border border-ifome rounded p-2 w-full">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Data Final</label>
+          <input type="date" id="dataFinal" class="border border-ifome rounded p-2 w-full">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+          <select id="filtroCidade" class="border border-ifome rounded p-2 w-full">
+            <option value="todas">Todas as Cidades</option>
+            <option value="lavras">Lavras</option>
+            <option value="sao_paulo">São Paulo</option>
+            <option value="rio">Rio de Janeiro</option>
+            <option value="itajuba">Itajubá</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Agrupar por</label>
+          <select id="filtroAgrupamento" class="border border-ifome rounded p-2 w-full">
+            <option value="dia">Por Dia</option>
+            <option value="semana">Por Semana</option>
+            <option value="mes">Por Mês</option>
+            <option value="dia_semana">Por Dia da Semana</option>
+            <option value="hora">Por Horário</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button id="aplicarFiltros" class="bg-ifome text-white px-4 py-2 rounded hover:bg-orange-700">
+          Aplicar Filtros
+        </button>
+        <button id="limparFiltros" class="ml-2 bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">
+          Limpar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARREGANDO -->
+  <div id="loading" class="hidden">
+    <div class="loader"></div>
+    <p class="text-center text-gray-600">Processando dados...</p>
+  </div>
+
+  <!-- VISÃO GERAL -->
+  <section id="visaoGeral" class="max-w-7xl mx-auto px-4 mt-6">
+    <div class="bg-white rounded-lg shadow p-4">
+      <h2 class="text-xl font-semibold mb-4 text-ifome">Visão Geral</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="border rounded-lg p-4 text-center">
+          <div id="totalLojas" class="text-3xl font-bold text-ifome">42</div>
+          <div class="text-gray-600">Lojas Cadastradas</div>
+        </div>
+        <div class="border rounded-lg p-4 text-center">
+          <div id="totalVendas" class="text-3xl font-bold text-green-600">1.284</div>
+          <div class="text-gray-600">Vendas Totais</div>
+        </div>
+        <div class="border rounded-lg p-4 text-center">
+          <div id="faturamentoTotal" class="text-3xl font-bold text-blue-600">R$ 128.950,00</div>
+          <div class="text-gray-600">Faturamento Total</div>
+        </div>
+        <div class="border rounded-lg p-4 text-center">
+          <div id="avaliacaoMedia" class="text-3xl font-bold text-purple-600">4.2</div>
+          <div class="text-gray-600">Avaliação Média</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINCIPAIS GRÁFICOS -->
+  <section id="graficosSection" class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Lojas que mais venderam (agora por quantidade de vendas) -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex justify-between items-center mb-2">
+        <h2 class="text-xl font-semibold text-ifome">Top Lojas por Vendas</h2>
+        <select id="filtroTopLojas" class="border border-ifome rounded p-1 text-sm">
+          <option value="5">Top 5</option>
+          <option value="10">Top 10</option>
+          <option value="15">Top 15</option>
+        </select>
+      </div>
+      <div class="h-64">
+        <canvas id="graficoTopLojas"></canvas>
+      </div>
+    </div>
+
+    <!-- Vendas ao longo do tempo -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h2 class="text-xl font-semibold mb-2 text-ifome">Vendas ao Longo do Tempo</h2>
+      <div class="h-64">
+        <canvas id="graficoVendasTempo"></canvas>
+      </div>
+    </div>
+
+    <!-- Avaliação média -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h2 class="text-xl font-semibold mb-2 text-ifome">Avaliação Média das Lojas</h2>
+      <div class="h-64">
+        <canvas id="graficoAvaliacoes"></canvas>
+      </div>
+    </div>
+
+    <!-- Distribuição por tipo de loja (agora por quantidade de vendas) -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h2 class="text-xl font-semibold mb-2 text-ifome">Distribuição por Tipo de Loja</h2>
+      <div class="h-64">
+        <canvas id="graficoTiposLoja"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- TABELAS DE DADOS -->
+  <section class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Lojas com melhor desempenho (ordenadas por vendas) -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h2 class="text-xl font-semibold mb-2 text-ifome">Lojas com Melhor Desempenho</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b">
+              <th class="p-2">Posição</th>
+              <th class="p-2">Loja</th>
+              <th class="p-2">Vendas</th>
+              <th class="p-2">Faturamento</th>
+              <th class="p-2">Avaliação</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaMelhoresLojas">
+            <!-- Dados serão preenchidos via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Lojas com baixo desempenho -->
+    <div class="bg-white rounded-lg shadow p-4">
+      <h2 class="text-xl font-semibold mb-2 text-ifome">Lojas com Baixo Desempenho</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b">
+              <th class="p-2">Loja</th>
+              <th class="p-2">Vendas</th>
+              <th class="p-2">Avaliação</th>
+              <th class="p-2">Último Pedido</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaPioresLojas">
+            <!-- Dados serão preenchidos via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- RODAPÉ -->
+  <footer class="text-center text-sm text-gray-500 py-6 mt-10">
+    &copy; 2025 Ifome - Relatórios Administrativos | Última atualização: <span id="dataAtualizacao"></span>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // Dados fictícios atualizados com Itajubá
+    const dados = {
+      lojas: [
+        { id: 1, nome: "Pizzaria do João", cidade: "lavras", tipo: "Pizzaria", vendas: 247, faturamento: 18525, avaliacao: 4.8 },
+        { id: 2, nome: "Hamburgueria Top", cidade: "sao_paulo", tipo: "Hamburgueria", vendas: 198, faturamento: 15840, avaliacao: 4.5 },
+        { id: 3, nome: "Sushi Delícia", cidade: "rio", tipo: "Comida estrangeira", vendas: 175, faturamento: 26250, avaliacao: 4.9 },
+        { id: 4, nome: "Lanchonete Rápida", cidade: "lavras", tipo: "Lanchonete", vendas: 12, faturamento: 960, avaliacao: 2.1 },
+        { id: 5, nome: "Pastelaria Dois Irmãos", cidade: "sao_paulo", tipo: "Lanchonete", vendas: 8, faturamento: 640, avaliacao: 2.8 },
+        { id: 6, nome: "Restaurante Bom Prato", cidade: "rio", tipo: "Restaurante", vendas: 120, faturamento: 9600, avaliacao: 4.3 },
+        { id: 7, nome: "Esfiharia Árabe", cidade: "lavras", tipo: "Lanchonete", vendas: 65, faturamento: 4550, avaliacao: 3.9 },
+        { id: 8, nome: "Casa de Massas", cidade: "sao_paulo", tipo: "Restaurante", vendas: 92, faturamento: 9200, avaliacao: 4.2 },
+        { id: 9, nome: "Taco Mexicano", cidade: "rio", tipo: "Comida estrangeira", vendas: 78, faturamento: 11700, avaliacao: 4.4 },
+        { id: 10, nome: "Padaria Pão Quente", cidade: "lavras", tipo: "Lanchonete", vendas: 45, faturamento: 2250, avaliacao: 3.7 },
+        // Lojas de Itajubá
+        { id: 11, nome: "Restaurante Piseirinho", cidade: "itajuba", tipo: "Restaurante", vendas: 150, faturamento: 12000, avaliacao: 4.6 },
+        { id: 12, nome: "O Melhor Açaí", cidade: "itajuba", tipo: "Sobremesa", vendas: 200, faturamento: 8000, avaliacao: 4.7 },
+        { id: 13, nome: "Ponderoso Açaí", cidade: "itajuba", tipo: "Sobremesa", vendas: 180, faturamento: 7200, avaliacao: 4.5 },
+        { id: 14, nome: "Hamburgueria Longe do Fim", cidade: "itajuba", tipo: "Hamburgueria", vendas: 130, faturamento: 10400, avaliacao: 4.3 },
+        { id: 15, nome: "Dom Penta", cidade: "itajuba", tipo: "Pizzaria", vendas: 160, faturamento: 12800, avaliacao: 4.4 },
+        { id: 16, nome: "Mercado Fernandinha", cidade: "itajuba", tipo: "Mercado", vendas: 90, faturamento: 4500, avaliacao: 3.8 },
+        { id: 17, nome: "Alvo-Parada", cidade: "itajuba", tipo: "Mercado", vendas: 85, faturamento: 4250, avaliacao: 3.9 },
+        { id: 18, nome: "Passada Opcional", cidade: "itajuba", tipo: "Bebidas", vendas: 70, faturamento: 5600, avaliacao: 4.1 }
+      ],
+      vendasPorTempo: [
+        { data: '2025-01-01', vendas: 45 },
+        { data: '2025-01-02', vendas: 68 },
+        { data: '2025-01-03', vendas: 72 },
+        { data: '2025-01-04', vendas: 89 },
+        { data: '2025-01-05', vendas: 56 },
+        { data: '2025-01-06', vendas: 94 },
+        { data: '2025-01-07', vendas: 102 },
+        { data: '2025-01-08', vendas: 78 },
+        { data: '2025-01-09', vendas: 85 },
+        { data: '2025-01-10', vendas: 91 }
+      ]
+    };
+
+    // Variáveis para os gráficos
+    let graficoTopLojas, graficoVendasTempo, graficoAvaliacoes, graficoTiposLoja;
+
+    // Formatação de valores monetários
+    const formatarMoeda = (valor) => {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    };
+
+    // Formatação de datas
+    const formatarData = (dataString) => {
+      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+      return new Date(dataString).toLocaleDateString('pt-BR', options);
+    };
+
+    // Atualizar data de atualização
+    document.getElementById('dataAtualizacao').textContent = formatarData(new Date());
+
+    // Inicializar filtros com datas padrão (últimos 30 dias)
+    const dataFinal = new Date();
+    const dataInicial = new Date();
+    dataInicial.setDate(dataInicial.getDate() - 30);
+
+    document.getElementById('dataInicial').valueAsDate = dataInicial;
+    document.getElementById('dataFinal').valueAsDate = dataFinal;
+
+    // Função para gerar cores únicas para cada categoria
+    const gerarCoresUnicas = (categorias) => {
+      const cores = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#8AC24A', '#FF6B6B', '#47B8E0', '#7A6FBE',
+        '#FFA07A', '#20B2AA', '#9370DB', '#32CD32', '#BA55D3'
+      ];
+      
+      const coresPorCategoria = {};
+      categorias.forEach((categoria, index) => {
+        coresPorCategoria[categoria] = cores[index % cores.length];
+      });
+      return coresPorCategoria;
+    };
+
+    // Função para filtrar os dados
+    const filtrarDados = () => {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('visaoGeral').classList.add('hidden');
+      document.getElementById('graficosSection').classList.add('hidden');
+
+      // Simular processamento assíncrono
+      setTimeout(() => {
+        const cidadeSelecionada = document.getElementById('filtroCidade').value;
+        const dataInicial = document.getElementById('dataInicial').value;
+        const dataFinal = document.getElementById('dataFinal').value;
+        const agrupamento = document.getElementById('filtroAgrupamento').value;
+        const topLojas = parseInt(document.getElementById('filtroTopLojas').value);
+
+        // Filtrar lojas por cidade
+        let lojasFiltradas = dados.lojas;
+        if (cidadeSelecionada !== 'todas') {
+          lojasFiltradas = lojasFiltradas.filter(loja => loja.cidade === cidadeSelecionada);
+        }
+
+        // Ordenar lojas por VENDAS (melhores primeiro)
+        const lojasOrdenadas = [...lojasFiltradas].sort((a, b) => b.vendas - a.vendas);
+        
+        // Atualizar visão geral
+        document.getElementById('totalLojas').textContent = lojasFiltradas.length;
+        document.getElementById('totalVendas').textContent = lojasFiltradas.reduce((acc, loja) => acc + loja.vendas, 0);
+        document.getElementById('faturamentoTotal').textContent = formatarMoeda(
+          lojasFiltradas.reduce((acc, loja) => acc + loja.faturamento, 0)
+        );
+        document.getElementById('avaliacaoMedia').textContent = (
+          lojasFiltradas.reduce((acc, loja) => acc + loja.avaliacao, 0) / lojasFiltradas.length
+        ).toFixed(1);
+
+        // Atualizar tabela de melhores lojas (ordenadas por vendas)
+        const tabelaMelhores = document.getElementById('tabelaMelhoresLojas');
+        tabelaMelhores.innerHTML = '';
+        lojasOrdenadas.slice(0, 5).forEach((loja, index) => {
+          const row = document.createElement('tr');
+          row.className = 'border-b';
+          row.innerHTML = `
+            <td class="p-2">${index + 1}</td>
+            <td class="p-2">${loja.nome}</td>
+            <td class="p-2 font-semibold">${loja.vendas}</td>
+            <td class="p-2">${formatarMoeda(loja.faturamento)}</td>
+            <td class="p-2 ${loja.avaliacao < 3 ? 'text-red-600' : 'text-green-600'}">${loja.avaliacao.toFixed(1)}</td>
+          `;
+          tabelaMelhores.appendChild(row);
+        });
+
+        // Atualizar tabela de piores lojas
+        const tabelaPiores = document.getElementById('tabelaPioresLojas');
+        tabelaPiores.innerHTML = '';
+        const lojasOrdenadasPiores = [...lojasFiltradas].sort((a, b) => a.vendas - b.vendas);
+        lojasOrdenadasPiores.slice(0, 3).forEach(loja => {
+          const row = document.createElement('tr');
+          row.className = 'border-b';
+          row.innerHTML = `
+            <td class="p-2">${loja.nome}</td>
+            <td class="p-2 font-semibold">${loja.vendas}</td>
+            <td class="p-2 ${loja.avaliacao < 3 ? 'text-red-600' : 'text-yellow-600'}">${loja.avaliacao.toFixed(1)}</td>
+            <td class="p-2">${formatarData('2025-06-15')}</td>
+          `;
+          tabelaPiores.appendChild(row);
+        });
+
+        // Atualizar gráficos
+        atualizarGraficos(lojasOrdenadas.slice(0, topLojas), agrupamento);
+
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('visaoGeral').classList.remove('hidden');
+        document.getElementById('graficosSection').classList.remove('hidden');
+      }, 1000);
+    };
+
+    // Função para atualizar gráficos
+    const atualizarGraficos = (lojas, agrupamento) => {
+      // Gráfico: Top lojas por VENDAS
+      if (graficoTopLojas) graficoTopLojas.destroy();
+      graficoTopLojas = new Chart(document.getElementById('graficoTopLojas'), {
+        type: 'bar',
+        data: {
+          labels: lojas.map(loja => loja.nome),
+          datasets: [{
+            label: 'Quantidade de Vendas',
+            data: lojas.map(loja => loja.vendas),
+            backgroundColor: '#f97316',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Vendas: ${context.raw}`;
+                },
+                afterLabel: function(context) {
+                  const loja = lojas[context.dataIndex];
+                  return `Faturamento: ${formatarMoeda(loja.faturamento)}\nAvaliação: ${loja.avaliacao.toFixed(1)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+
+      // Gráfico: Vendas ao longo do tempo
+      if (graficoVendasTempo) graficoVendasTempo.destroy();
+      graficoVendasTempo = new Chart(document.getElementById('graficoVendasTempo'), {
+        type: 'line',
+        data: {
+          labels: dados.vendasPorTempo.map(item => formatarData(item.data)),
+          datasets: [{
+            label: 'Vendas',
+            data: dados.vendasPorTempo.map(item => item.vendas),
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 2,
+            tension: 0.1,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+
+      // Gráfico: Avaliação média
+      if (graficoAvaliacoes) graficoAvaliacoes.destroy();
+      graficoAvaliacoes = new Chart(document.getElementById('graficoAvaliacoes'), {
+        type: 'bar',
+        data: {
+          labels: lojas.map(loja => loja.nome),
+          datasets: [{
+            label: 'Avaliação',
+            data: lojas.map(loja => loja.avaliacao),
+            backgroundColor: lojas.map(loja => loja.avaliacao < 3 ? '#ef4444' : '#10b981'),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Avaliação: ${context.raw.toFixed(1)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 5
+            }
+          }
+        }
+      });
+
+      // Gráfico: Distribuição por tipo de loja (agora por VENDAS)
+      if (graficoTiposLoja) graficoTiposLoja.destroy();
+      
+      // Agrupar por tipo de loja
+      const tipos = {};
+      lojas.forEach(loja => {
+        const tipoFormatado = loja.tipo === "Comida estra" ? "Comida estrangeira" : loja.tipo;
+        if (!tipos[tipoFormatado]) {
+          tipos[tipoFormatado] = 0;
+        }
+        tipos[tipoFormatado] += loja.vendas;
+      });
+
+      // Gerar cores únicas para cada tipo de loja
+      const coresPorTipo = gerarCoresUnicas(Object.keys(tipos));
+
+      graficoTiposLoja = new Chart(document.getElementById('graficoTiposLoja'), {
+        type: 'pie',
+        data: {
+          labels: Object.keys(tipos),
+          datasets: [{
+            data: Object.values(tipos),
+            backgroundColor: Object.keys(tipos).map(tipo => coresPorTipo[tipo]),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.label}: ${context.raw} vendas`;
+                }
+              }
+            }
+          }
+        }
+      });
+    };
+
+    // Event listeners
+    document.getElementById('aplicarFiltros').addEventListener('click', filtrarDados);
+    document.getElementById('limparFiltros').addEventListener('click', () => {
+      document.getElementById('dataInicial').valueAsDate = new Date(new Date().setDate(new Date().getDate() - 30));
+      document.getElementById('dataFinal').valueAsDate = new Date();
+      document.getElementById('filtroCidade').value = 'todas';
+      document.getElementById('filtroAgrupamento').value = 'dia';
+      document.getElementById('filtroTopLojas').value = '5';
+      filtrarDados();
+    });
+
+    document.getElementById('filtroTopLojas').addEventListener('change', filtrarDados);
+
+    // Inicializar
+    filtrarDados();
+  </script>
+</body>
+</html>
