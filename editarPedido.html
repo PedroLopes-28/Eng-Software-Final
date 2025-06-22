@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Editar Pedido</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #ff6b00;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border 0.3s;
+    }
+
+    input:focus, select:focus {
+      border-color: #ff6b00;
+      outline: none;
+    }
+
+    input[readonly] {
+      background-color: #f0f0f0;
+    }
+
+    button {
+      background-color: #ff6b00;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      width: 100%;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #e05d00;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1 id="titulo">Editar Pedido</h1>
+
+    <!-- Campos somente leitura -->
+    <label>Cliente</label>
+    <input type="text" id="nome" readonly>
+
+    <label>Telefone</label>
+    <input type="text" id="telefone" readonly>
+
+    <label>Loja</label>
+    <input type="text" id="loja" readonly>
+
+    <label>Endereço de Entrega</label>
+    <input type="text" id="endereco" readonly>
+
+    <label>Itens do Pedido</label>
+    <input type="text" id="itens" readonly>
+
+    <label>Subtotal</label>
+    <input type="text" id="subtotal" readonly>
+
+    <label>Descrição</label>
+    <input type="text" id="descricao" readonly>
+
+    <!-- Campos editáveis -->
+    <label>Estimativa de Tempo</label>
+    <input type="text" id="estimativa">
+
+    <label>Estado do Pedido</label>
+    <select id="estado">
+      <option value="Não visualizado">Não visualizado</option>
+      <option value="Aprovado">Aprovado</option>
+      <option value="Preparando pedido">Preparando pedido</option>
+      <option value="Saiu pra entrega">Saiu pra entrega</option>
+      <option value="Cancelado">Cancelado</option>
+    </select>
+
+    <button onclick="salvar()">Salvar Alterações</button>
+  </div>
+
+  <script>
+    const pedidos = {
+      "pedido-001": {
+        nome: "Leandro",
+        telefone: "(11) 90000-0000",
+        loja: "Fit LowCarb - Rua das Frutas, 123",
+        endereco: "Rua Paraíso, Campinas - SP, Ap 9000",
+        itens: "1x Abobrinha - R$17,00, 2x Rocambole - R$66,00",
+        subtotal: "R$83,00",
+        descricao: "Sem cebola",
+        estimativa: "45 minutos",
+        estado: "Não visualizado"
+      }
+    };
+
+    function carregarPedido() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      if (!id || !pedidos[id]) {
+        alert("Pedido não encontrado.");
+        return;
+      }
+
+      const p = pedidos[id];
+
+      document.getElementById("titulo").textContent = `Pedido ${id.replace("pedido-", "#")} - ${p.nome}`;
+      document.getElementById("nome").value = p.nome;
+      document.getElementById("telefone").value = p.telefone;
+      document.getElementById("loja").value = p.loja;
+      document.getElementById("endereco").value = p.endereco;
+      document.getElementById("itens").value = p.itens;
+      document.getElementById("subtotal").value = p.subtotal;
+      document.getElementById("descricao").value = p.descricao;
+      document.getElementById("estimativa").value = p.estimativa;
+      document.getElementById("estado").value = p.estado;
+    }
+
+    function salvar() {
+      const estimativa = document.getElementById('estimativa').value;
+      const estado = document.getElementById('estado').value;
+
+      alert("Alterações salvas com sucesso!\n\nEstimativa: " + estimativa + "\nEstado: " + estado);
+    }
+
+    window.onload = carregarPedido;
+  </script>
+
+</body>
+</html>
