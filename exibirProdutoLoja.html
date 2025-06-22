@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iFome - Meus Produtos</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      color: #ff6b00;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .produto-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .produto-header {
+      display: flex;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .produto-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #ff6b00;
+    }
+
+    .produto-detalhes {
+      display: none;
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .actions button {
+      flex: 1;
+      background-color: #ff6b00;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .actions button:hover {
+      background-color: #e05d00;
+    }
+
+    .link-voltar {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .link-voltar a {
+      color: #ff6b00;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .link-voltar a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Meus Produtos</h1>
+    <div id="listaProdutos"></div>
+
+    <div class="link-voltar">
+      <a href="cadastrarProduto.html">Cadastrar novo produto</a>
+    </div>
+  </div>
+
+  <script>
+    let lista = JSON.parse(localStorage.getItem('produtos')) || [];
+
+    function salvarLista() {
+      localStorage.setItem('produtos', JSON.stringify(lista));
+    }
+
+    function toggleDetalhes(id) {
+      const el = document.getElementById('detalhes-' + id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function editarProduto(id) {
+      alert('Recurso de edição rápida pode ser implementado aqui. Por enquanto, edite diretamente no cadastro.');
+    }
+
+    function excluirProduto(id) {
+      if (confirm('Deseja realmente excluir este produto?')) {
+        lista = lista.filter(p => p.id !== id);
+        salvarLista();
+        renderizarProdutos();
+      }
+    }
+
+    function renderizarProdutos() {
+      const container = document.getElementById('listaProdutos');
+      container.innerHTML = '';
+
+      lista.forEach(prod => {
+        const card = document.createElement('div');
+        card.className = 'produto-card';
+        card.innerHTML = `
+          <div class="produto-header" onclick="toggleDetalhes(${prod.id})">
+            <h3>${prod.nome} (${prod.secao})</h3>
+            <span>▼</span>
+          </div>
+          <div class="produto-detalhes" id="detalhes-${prod.id}">
+            <p><strong>Descrição:</strong> ${prod.descricao}</p>
+            <p><strong>Preço:</strong> R$ ${parseFloat(prod.preco).toFixed(2)}</p>
+            <p><strong>Ingredientes:</strong> ${prod.ingredientes}</p>
+            <p><strong>Tempo:</strong> ${prod.tempo} min</p>
+            <p><strong>Promoção:</strong> ${prod.promocional ? 'R$ ' + parseFloat(prod.promocional).toFixed(2) : '-'}</p>
+            <div class="actions">
+              <button onclick="editarProduto(${prod.id})">Editar</button>
+              <button onclick="excluirProduto(${prod.id})">Excluir</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    renderizarProdutos();
+  </script>
+</body>
+</html>
