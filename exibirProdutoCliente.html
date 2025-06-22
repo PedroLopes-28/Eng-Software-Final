@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>iFome - Cardápio</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      color: #ff6b00;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .produto-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .produto-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .produto-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #ff6b00;
+    }
+
+    .produto-detalhes {
+      display: none;
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+
+    .produto-detalhes p {
+      margin: 4px 0;
+    }
+
+    .btn-add {
+      margin-top: 10px;
+      background-color: #ff6b00;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-add:hover {
+      background-color: #e05d00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cardápio da Loja</h1>
+    <div id="listaProdutos"></div>
+  </div>
+
+  <script>
+    const lista = JSON.parse(localStorage.getItem('produtos')) || [];
+
+    function toggleDetalhes(id) {
+      const el = document.getElementById('detalhes-' + id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function adicionarAoCarrinho(produto) {
+      alert(`Adicionado ao carrinho: ${produto.nome}`);
+    }
+
+    function renderizarProdutos() {
+      const container = document.getElementById('listaProdutos');
+      container.innerHTML = '';
+
+      lista.forEach(prod => {
+        const card = document.createElement('div');
+        card.className = 'produto-card';
+        card.innerHTML = `
+          <div class="produto-header" onclick="toggleDetalhes(${prod.id})">
+            <h3>${prod.nome} (${prod.secao})</h3>
+            <span>▼</span>
+          </div>
+          <div class="produto-detalhes" id="detalhes-${prod.id}">
+            <p><strong>Descrição:</strong> ${prod.descricao}</p>
+            <p><strong>Preço:</strong> R$ ${parseFloat(prod.promocional || prod.preco).toFixed(2)}</p>
+            <p><strong>Ingredientes:</strong> ${prod.ingredientes}</p>
+            <p><strong>Tempo de preparo:</strong> ${prod.tempo} min</p>
+            <button class="btn-add" onclick='adicionarAoCarrinho(${JSON.stringify(prod)})'>Adicionar ao Carrinho</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    renderizarProdutos();
+  </script>
+</body>
+</html>
