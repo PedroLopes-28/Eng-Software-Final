@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inserir Pedido</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #ff6b00;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #ff6b00;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      background-color: #ff6b00;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      width: 100%;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #e05d00;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Inserir Pedido</h1>
+    <form action="#" method="post">
+
+      <!-- Dados do Cliente -->
+      <label for="nomeCliente">Nome do Cliente</label>
+      <input type="text" id="nomeCliente" name="nomeCliente" required>
+
+      <label for="telefoneCliente">Telefone</label>
+      <input type="tel" id="telefoneCliente" name="telefoneCliente" required>
+
+      <label for="emailCliente">E-mail</label>
+      <input type="email" id="emailCliente" name="emailCliente" required>
+
+      <label for="enderecoEntrega">Endereço de Entrega</label>
+      <input type="text" id="enderecoEntrega" name="enderecoEntrega" required>
+
+      <!-- Dados da Loja -->
+      <label for="nomeLoja">Nome da Loja</label>
+      <input type="text" id="nomeLoja" name="nomeLoja" required>
+
+      <label for="enderecoLoja">Endereço da Loja</label>
+      <input type="text" id="enderecoLoja" name="enderecoLoja" required>
+
+      <!-- Dados do Pedido -->
+      <label for="itensPedido">Itens do Pedido</label>
+      <textarea id="itensPedido" name="itensPedido" rows="3" placeholder="Ex: 1x X-Burguer, 2x Suco de Laranja" required></textarea>
+
+      <label for="descricaoPedido">Descrição do Pedido (opcional)</label>
+      <textarea id="descricaoPedido" name="descricaoPedido" rows="2" placeholder="Ex: Sem cebola, bebida bem gelada."></textarea>
+
+      <label for="subtotal">Subtotal do Pedido (R$)</label>
+      <input type="number" id="subtotal" name="subtotal" step="0.01" min="0" required>
+
+      <label for="precoFinal">Preço Total (R$)</label>
+      <input type="number" id="precoFinal" name="precoFinal" step="0.01" min="0" required>
+
+      <label for="estimativa">Estimativa de Tempo</label>
+      <input type="text" id="estimativa" name="estimativa" placeholder="Ex: 45 minutos" required>
+
+      <label for="estadoPedido">Estado do Pedido</label>
+      <select id="estadoPedido" name="estadoPedido" required>
+        <option value="Não visualizado">Não visualizado</option>
+        <option value="Aprovado">Aprovado</option>
+        <option value="Preparando pedido">Preparando pedido</option>
+        <option value="Saiu pra entrega">Saiu pra entrega</option>
+        <option value="Cancelado">Cancelado</option>
+      </select>
+
+      <button type="submit">Cadastrar Pedido</button>
+    </form>
+  </div>
+
+</body>
+</html>
